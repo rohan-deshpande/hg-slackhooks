@@ -5,13 +5,12 @@ import json
 from collections import namedtuple
 from mercurial.cmdutil import show_changeset
 
-
 config_group = 'slackhooks'
 Config = namedtuple(
     'HgSlackHooksConfig',
     field_names=[
-        'token',
         'org_name',
+        'webhook_url',
         'repo_name',
         'commit_url',
         'username',
@@ -19,17 +18,16 @@ Config = namedtuple(
         'icon_url',
     ])
 
-
 def get_config(ui):
-    token = ui.config(config_group, 'token')
     org_name = ui.config(config_group, 'org_name')
+    webhook_url = ui.config(config_group, 'webhook_url')
     repo_name = ui.config(config_group, 'repo_name', default=None)
     commit_url = ui.config(config_group, 'commit_url', default=None)
     username = ui.config(config_group, 'username', default="mercurial")
     icon_emoji = ui.config(config_group, 'icon_emoji', default=None)
     icon_url = ui.config(config_group, 'icon_url', default=None)
 
-    return Config(token, org_name, repo_name, commit_url, username, icon_emoji,
+    return Config(org_name, webhook_url, repo_name, commit_url, username, icon_emoji,
                   icon_url)
 
 
@@ -82,9 +80,7 @@ def render_changesets(ui, repo, changesets, config):
 
 
 def post_message_to_slack(message, config):
-    target_url = "https://{org_name}.slack.com/services/hooks/incoming-webhook?token={token}".format(
-        org_name=config.org_name,
-        token=config.token)
+    target_url = "{webhook_url}".format(webhook_url=config.webhook_url)
     payload = {
         'text': message,
         'username': config.username,
@@ -94,6 +90,21 @@ def post_message_to_slack(message, config):
     request = urllib2.Request(target_url, "payload={0}".format(json.dumps(payload)))
     urllib2.build_opener().open(request)
 
+def print_keyword_args(**kwargs):
+    # kwargs is a dict of the keyword args passed to the function
+    for key, value in kwargs.iteritems():
+        print "%s = %s" % (key, value)
+
+def on_update(ui, repo, **kwargs):
+    #print_keyword_args(**kwargs)
+    config = get_config(ui)
+    branch = repo[kwargs.get('parent1')].branch()
+    text = "*{username}* updated to branch `{branch}`".format(
+        branch=branch,
+        username=config.username
+    )
+
+    post_message_to_slack(text, config)
 
 def payload_optional_key(payload, config, key):
     value = config.__getattribute__(key)
