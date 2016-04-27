@@ -16,7 +16,7 @@ To add push hooks for some repo, modify ``.hg/hgrc`` in the central repository:
     icon_emoji = :turtle:
 
     [hooks]
-    changegroup.slackhooks= python:/path/to/slackhooks.py:pushhook
+    outgoing.slackhooks= python:/path/to/slackhooks.py:pushhook
 ```
 
 Example of chat message output:
