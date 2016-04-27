@@ -31,8 +31,7 @@ def get_config(ui):
                   icon_url)
 
 
-def pushhook(node, hooktype, url, repo, source, ui, **kwargs):
-    username = url[url.rfind('::')+2:]
+def pushhook(ui, repo, node, **kwargs):
     config = get_config(ui)
 
     changesets = get_changesets(repo, node)
@@ -42,8 +41,8 @@ def pushhook(node, hooktype, url, repo, source, ui, **kwargs):
     ensure_plural = "s" if count > 1 else ""
     ensure_repo_name = " to \"{0}\"".format(config.repo_name) if config.repo_name else ""
 
-    text = "{user} pushes {count} changeset{ensure_plural}{ensure_repo_name}:\n```{changes}```".format(
-        user=username,
+    text = "Pushed {count} changeset{ensure_plural}{ensure_repo_name}:\n```{changes}```".format(
+        user=config.username,
         count=count,
         ensure_plural=ensure_plural,
         ensure_repo_name=ensure_repo_name,
@@ -99,7 +98,7 @@ def on_update(ui, repo, **kwargs):
     #print_keyword_args(**kwargs)
     config = get_config(ui)
     branch = repo[kwargs.get('parent1')].branch()
-    text = "*{username}* updated to branch `{branch}`".format(
+    text = "Updated to branch `{branch}`".format(
         branch=branch,
         username=config.username
     )
