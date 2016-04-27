@@ -37,6 +37,8 @@ Example of chat message output:
 
 ## Testing
 
+> **NOTE** Don't run any tests in your active repo! Create a test repo to run any kind of test.
+
 You can test any hg hook and command by running the following code in your terminal while inside the repo
 
 `hg --config hooks.pre-commit="export| grep HG_" commit`
