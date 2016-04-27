@@ -33,18 +33,19 @@ def get_config(ui):
 
 def pushhook(ui, repo, node, **kwargs):
     config = get_config(ui)
-
+    branch = repo[kwargs.get('parent1')].branch()
     changesets = get_changesets(repo, node)
     count = len(changesets)
     messages = render_changesets(ui, repo, changesets, config)
 
     ensure_plural = "s" if count > 1 else ""
-    ensure_repo_name = " to \"{0}\"".format(config.repo_name) if config.repo_name else ""
+    ensure_branch_name = " to branch *{0}*".format(branch) if branch else ""
+    ensure_repo_name = " in _{0}_".format(config.repo_name) if config.repo_name else ""
 
-    text = "Pushed {count} changeset{ensure_plural}{ensure_repo_name}:\n```{changes}```".format(
-        user=config.username,
+    text = "Pushed {count} changeset{ensure_plural}{ensure_branch_name}{ensure_repo_name}:\n```{changes}```".format(
         count=count,
         ensure_plural=ensure_plural,
+        ensure_branch_name=ensure_branch_name,
         ensure_repo_name=ensure_repo_name,
         changes=messages)
 
@@ -99,8 +100,7 @@ def on_update(ui, repo, **kwargs):
     config = get_config(ui)
     branch = repo[kwargs.get('parent1')].branch()
     text = "Updated to branch `{branch}`".format(
-        branch=branch,
-        username=config.username
+        branch=branch
     )
 
     post_message_to_slack(text, config)
