@@ -41,7 +41,7 @@ def pushhook(ui, repo, node, **kwargs):
     ensure_plural = "s" if count > 1 else ""
     ensure_repo_name = " to \"{0}\"".format(config.repo_name) if config.repo_name else ""
 
-    text = "{user} pushed {count} changeset{ensure_plural}{ensure_repo_name}:\n```{changes}```".format(
+    text = "Pushed {count} changeset{ensure_plural}{ensure_repo_name}:\n```{changes}```".format(
         user=config.username,
         count=count,
         ensure_plural=ensure_plural,
@@ -98,7 +98,7 @@ def on_update(ui, repo, **kwargs):
     #print_keyword_args(**kwargs)
     config = get_config(ui)
     branch = repo[kwargs.get('parent1')].branch()
-    text = "*{username}* updated to branch `{branch}`".format(
+    text = "Updated to branch `{branch}`".format(
         branch=branch,
         username=config.username
     )
