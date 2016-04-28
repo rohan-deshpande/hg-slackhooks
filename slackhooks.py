@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import urllib2
 import json
+import logging
 
 from collections import namedtuple
 from mercurial.cmdutil import show_changeset
@@ -34,7 +35,7 @@ def get_config(ui):
 def pushhook(ui, repo, node, **kwargs):
     config = get_config(ui)
     branch = repo[kwargs.get('parent1')].branch()
-    changesets = get_changesets(repo, node)
+    changesets = get_changesets(repo, node, branch)
     count = len(changesets)
     messages = render_changesets(ui, repo, changesets, config)
 
@@ -52,10 +53,14 @@ def pushhook(ui, repo, node, **kwargs):
     post_message_to_slack(text, config)
 
 
-def get_changesets(repo, node):
+def get_changesets(repo, node, branch):
     node_rev = repo[node].rev()
     tip_rev = repo['tip'].rev()
-    return range(tip_rev, node_rev - 1, -1)
+    changesets = []
+    for rev in range(tip_rev, node_rev - 1, -1):
+        if repo[rev].branch() == branch:
+            changesets.append(rev)
+    return changesets
 
 
 def render_changesets(ui, repo, changesets, config):
