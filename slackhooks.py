@@ -32,7 +32,9 @@ def get_config(ui):
                   icon_url)
 
 
-def pushhook(ui, repo, node, **kwargs):
+def pushhook(ui, repo, node, source, **kwargs):
+    if source != 'push':
+        return
     config = get_config(ui)
     branch = repo[kwargs.get('parent1')].branch()
     changesets = get_changesets(repo, node, branch)
